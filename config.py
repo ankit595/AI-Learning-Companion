@@ -75,7 +75,7 @@ LLM_MODEL = _MODEL_MAP.get(LLM_PROVIDER, OPENAI_LLM_MODEL)
 
 # Embeddings — Groq and Ollama(llama) don't offer embeddings API
 # so they fall back to OpenAI embeddings (or HuggingFace if no key)
-EMBED_VIA_OPENAI = LLM_PROVIDER in ("op", "openai")
+EMBED_VIA_OPENAI = LLM_PROVIDER in ("openai", "groq", "ollama")
 EMBED_MODEL = {
     "openai": OPENAI_EMBED_MODEL,
     "gemini": GEMINI_EMBED_MODEL,
