@@ -429,10 +429,6 @@ For a production-like setup on a remote server:
    git pull
    docker compose up --build -d
    ```
-
-> ⚠️ Before pushing to a public/shared repo, see the **"BEFORE PUSHING"**
-> checklist in `plan.txt` to remove or genericise any internal configuration.
-
 ---
 
 ## Project Structure
@@ -471,7 +467,3 @@ docker-compose.yml     # Runs FastAPI + Streamlit together
 
 - All persistent data (`chroma_db/`, `memory.db`, `notes/`, `data/`) lives on
   disk and is gitignored — nothing is lost between restarts.
-- `plan.txt` tracks the full build history and roadmap for this project.
-- Before sharing or open-sourcing this repo, see the "BEFORE PUSHING TO A
-  PUBLIC / SHARED REPO" checklist in `plan.txt` for steps to remove any
-  internal/corporate-specific configuration.
