@@ -442,8 +442,7 @@ agents/
   researcher.py        # Wikipedia + ingested docs combined
   ingestor.py           # "add data/file.pdf" — ingest via chat
   coding.py              # Sandboxed Python code execution
-  summariser.py           # "summarise everything I know about X"
-  knowledge.py             # Empty stub — reserved for Phase 5 (Neo4j, deferred)
+  summariser.py           # "summarise everything I know about X" 
 
 api/               # FastAPI app: routers, models, dependencies
 vectorstore/       # Document ingestion + hybrid (BM25 + Chroma) retrieval
