@@ -1,0 +1,56 @@
+# =============================================================================
+# docker-compose.yml — runs the FastAPI backend + Streamlit frontend together.
+#
+# Usage:
+#   docker compose up --build
+#   Streamlit UI:  http://localhost:8501
+#   FastAPI docs:  http://localhost:8000/docs
+#
+# Notes:
+#   - The container's LLM_PROVIDER is controlled by DOCKER_LLM_PROVIDER in
+#     your .env (defaults to "openai" if not set) — independent from your
+#     local LLM_PROVIDER, since the NetApp proxy's SSL/network setup is
+#     host-specific and may not be reachable from inside a container.
+#     To test with Groq later: add DOCKER_LLM_PROVIDER=groq and GROQ_API_KEY
+#     to .env, then re-run `docker compose up --build`. Groq has no
+#     embeddings API, so llm_factory.py automatically falls back to OpenAI
+#     embeddings — make sure OPENAI_API_KEY is also set either way.
+#   - Persistent data (chroma_db, memory.db, notes, data) is bind-mounted so
+#     it survives container rebuilds/restarts.
+# =============================================================================
+
+services:
+  api:
+    build: .
+    container_name: learning-companion-api
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    environment:
+      - LLM_PROVIDER=${DOCKER_LLM_PROVIDER:-openai}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+    env_file:
+      - .env   # picks up GROQ_API_KEY / OPENAI_API_KEY / other keys; overrides above win
+    volumes:
+      - ./chroma_db:/app/chroma_db
+      - ./memory.db:/app/memory.db
+      - ./notes:/app/notes
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: learning-companion-app
+    command: streamlit run app.py --server.address=0.0.0.0 --server.port=8501
+    ports:
+      - "8501:8501"
+    environment:
+      - API_BASE=http://api:8000
+    depends_on:
+      api:
+        condition: service_healthy

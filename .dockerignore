@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+.git/
+.gitignore
+chroma_db/
+notes/
+data/
+*.db
+*.sqlite
+.DS_Store
+README.md
+plan.txt
+*.md
