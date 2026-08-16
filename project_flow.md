@@ -329,7 +329,7 @@ quiz = quiz_llm.invoke("Generate 3 MCQs on Docker containers")
 
 ## SSL Fix — Required on Every File
 
-On the NetApp corporate network, add this to the top of every Python file:
+For corporate proxies or custom SSL certificates, add this to the top of `config.py`:
 
 ```python
 import os
@@ -339,7 +339,7 @@ os.environ["SSL_CERT_FILE"]      = pem
 os.environ["CURL_CA_BUNDLE"]     = pem
 ```
 
-Put it in `config.py` once — import config at the top of every other file → fix applied everywhere.
+Then import config at the top of every other file → fix applied everywhere.
 
 ---
 
@@ -348,13 +348,11 @@ Put it in `config.py` once — import config at the top of every other file → 
 Pick one provider and put it in `config.py`. Do not mix.
 
 ```python
-# Option A: OpenAI via NetApp proxy (current setup)
+# Option A: Direct OpenAI API
 from langchain_openai import ChatOpenAI
 llm = ChatOpenAI(
-    model="gpt-4.1",
-    base_url="https://llm-proxy-api.ai.eng.netapp.com",
+    model="gpt-4o-mini",
     api_key=os.getenv("OPENAI_API_KEY"),
-    model_kwargs={"user": "ak16683"}
 )
 
 # Option B: Groq (free, fast, no proxy dependency)

@@ -28,8 +28,8 @@ topic — all through one conversational interface.
   sidebar
 - **Memory** — remembers your profile, progress, and notes across sessions
   (SQLite-backed)
-- **Multi-provider LLMs** — switch between OpenAI, Groq, Gemini, Ollama (or an
-  internal NetApp proxy) via a single `.env` variable — zero code changes
+- **Multi-provider LLMs** — switch between OpenAI, Groq, Gemini, or Ollama
+  via a single `.env` variable — zero code changes
 
 ---
 
@@ -138,8 +138,7 @@ flowchart TD
         Groq["Groq\nllama-3.1-8b-instant"]
         Gemini["Gemini\ngemini-2.0-flash"]
         Ollama["Ollama\nllama3.2 (local)"]
-        NetApp["NetApp Proxy\n(internal)"]
-        Provider --> OpenAI & Groq & Gemini & Ollama & NetApp
+        Provider --> OpenAI & Groq & Gemini & Ollama
     end
 
     User --> Chat --> POST_chat --> Graph
@@ -280,7 +279,6 @@ Edit `.env` (no code changes needed):
 | `LLM_PROVIDER=groq` | Uses `GROQ_API_KEY` (fast, free tier available) |
 | `LLM_PROVIDER=gemini` | Uses `GEMINI_API_KEY` |
 | `LLM_PROVIDER=ollama` | Uses local Ollama server at `http://localhost:11434` |
-| `LLM_PROVIDER=netapp` | Internal NetApp proxy (requires corp VPN + SSL cert) |
 
 Restart the FastAPI server after changing `LLM_PROVIDER`.
 

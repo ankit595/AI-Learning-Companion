@@ -11,7 +11,7 @@
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import config   # loads .env + SSL fix for netapp provider
+import config   # loads .env
 
 from fastapi import FastAPI
 from api.routers import chat, ingest, notes, profile, code, sources

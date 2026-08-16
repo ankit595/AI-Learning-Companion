@@ -20,7 +20,7 @@ PHASE 1 — MVP
 ✅ Step 1b: llm_factory.py (ADDED — not in original plan)
    → Provider-agnostic factory: get_llm(), get_embedder(),
      get_llm_with_structured_output()
-   → Supports: netapp / openai / groq / gemini / ollama
+   → Supports: openai / groq / gemini / ollama
    → Switch provider via LLM_PROVIDER env var — zero agent changes
    → Groq fallback: uses OpenAI embeddings (Groq has no embeddings API)
 
@@ -29,7 +29,7 @@ PHASE 1 — MVP
    → Retriever uses MMR (fetch_k=20, return k=5 diverse results)
    → Auto-metadata: topic (LLM detected), language, user_id, ingested_at
    DECISIONS:
-     ✅ Embedding: text-embedding-3-small via NetApp proxy
+     ✅ Embedding: text-embedding-3-small via OpenAI API
      ✅ Chunking: RecursiveCharacterTextSplitter (800 chars, 100 overlap)
      ✅ Retrieval: MMR (not plain similarity — avoids duplicate chunks)
      ✅ User isolation: user_id stamped on chunks + filtered on retrieval
@@ -186,7 +186,7 @@ PHASE 4 — UI
    → Dockerfile: python:3.11-slim, installs all 38 deps, shared image
    → docker-compose.yml: api (port 8000) + app (port 8501) services
    → DOCKER_LLM_PROVIDER env var: containers default to openai,
-     independent of local LLM_PROVIDER (avoids NetApp SSL in containers)
+     independent of local LLM_PROVIDER
    → Persistent bind mounts: chroma_db/, memory.db, notes/, data/
    → Healthcheck on api; app depends_on api (condition: service_healthy)
    → .dockerignore: excludes .venv/, __pycache__, .env, chroma_db/,
@@ -269,10 +269,9 @@ EXTRA DECISIONS (DEFERRED)
      general coverage) — verified with direct + edge-case tests
 
 ----------------------------------------------------------------
-❓ BEFORE PUSHING TO A PUBLIC / SHARED REPO — sanitize NetApp internals
+❓ BEFORE PUSHING TO A PUBLIC / SHARED REPO
 ----------------------------------------------------------------
-(Not urgent — only needed before making the repo public or sharing it
- outside of personal/NetApp use. Nothing here blocks local dev or Docker.)
+(Checklist for open-sourcing the project.)
 
 ❓ .env — currently gitignored already (verify), but double check it was
    NEVER committed in git history (git log --all --full-history -- .env).
@@ -285,39 +284,11 @@ EXTRA DECISIONS (DEFERRED)
       notes/, data/, caches). Just make sure git init + first commit happens
       AFTER .gitignore is in place, and .env is never force-added.
 
-❓ config.py — hardcoded NetApp-identifying values to remove/genericize
-   before open-sourcing:
-     - NETAPP_BASE_URL = "https://llm-proxy-api.ai.eng.netapp.com"
-     - NETAPP_USER     = "ak16683"   (your corporate username, hardcoded)
-   → Replace both with os.getenv("NETAPP_BASE_URL"), os.getenv("NETAPP_USER")
-     (no default, or a generic placeholder) so no personal/corporate
-     identifiers ship in the source code itself.
-
-❓ config.py / llm_factory.py — the netapp provider branch itself
-   (NETAPP_BASE_URL, NETAPP_USER header, NETAPP_LLM_MODEL, NETAPP_EMBED_MODEL,
-   and the "netapp" case in llm_factory.py's get_llm()/get_embedder())
-   → OPTIONAL full removal if you don't want any trace of the internal
-     proxy setup in a public repo at all. Not required if just genericizing
-     via env vars (previous item) is enough — your call.
-
-❓ .env.example — create a template file (safe to commit) showing required
-   keys WITHOUT real values, e.g.:
-     LLM_PROVIDER=openai
-     OPENAI_API_KEY=
-     GROQ_API_KEY=
-     GOOGLE_API_KEY=
-   so others (or future-you on a new laptop) know what to fill in without
-   ever seeing your real key.
-   ✅ DONE — .env.example created with all provider options documented.
-
 ❓ README.md — currently missing; add setup instructions once repo is
    shared (clone → copy .env.example to .env → fill keys → pip install -r
    requirements.txt → uvicorn / streamlit run commands).
    ✅ DONE — README.md created (features, architecture, setup steps,
-      project structure, pointer to plan.txt's sanitize checklist).
-
-❓ grep the whole repo for "netapp", "ak16683", or any other personal/
-   corporate strings before pushing, to catch anything missed above
+      project structure, pointer to pre-push checklist).
    (comments, docstrings, plan.txt itself, etc.)
 
 ----------------------------------------------------------------

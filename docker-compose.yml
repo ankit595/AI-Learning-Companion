@@ -9,8 +9,7 @@
 # Notes:
 #   - The container's LLM_PROVIDER is controlled by DOCKER_LLM_PROVIDER in
 #     your .env (defaults to "openai" if not set) — independent from your
-#     local LLM_PROVIDER, since the NetApp proxy's SSL/network setup is
-#     host-specific and may not be reachable from inside a container.
+    local LLM_PROVIDER.
 #     To test with Groq later: add DOCKER_LLM_PROVIDER=groq and GROQ_API_KEY
 #     to .env, then re-run `docker compose up --build`. Groq has no
 #     embeddings API, so llm_factory.py automatically falls back to OpenAI

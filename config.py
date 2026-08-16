@@ -3,7 +3,6 @@
 # Import this at the top of every file → SSL fix applied everywhere
 #
 # TO SWITCH PROVIDER: change LLM_PROVIDER below to one of:
-#   "netapp"   → NetApp proxy (OpenAI-compatible, requires LLM_USER)
 #   "openai"   → Direct OpenAI API
 #   "groq"     → Groq (fast inference, free tier, llama/mixtral models)
 #   "gemini"   → Google Gemini via langchain-google-genai
@@ -19,27 +18,8 @@ load_dotenv()
 # -----------------------------------------------------------------------------
 # ★ PROVIDER SWITCH — change this one line to switch LLM provider
 # -----------------------------------------------------------------------------
-LLM_PROVIDER = os.getenv("LLM_PROVIDER", "netapp")   # override via .env too
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "openai")   # override via .env too
 print(f"LLM_PROVIDER={LLM_PROVIDER} (from .env or default)")
-# -----------------------------------------------------------------------------
-# SSL Fix — only needed for NetApp corporate network (macOS + Homebrew OpenSSL)
-# Safe on other machines/OSes: only applies if a real cert file is found.
-# Override the path explicitly via NETAPP_CA_BUNDLE in .env if yours differs
-# (e.g. a different laptop, Linux, or a future Homebrew version bump).
-# -----------------------------------------------------------------------------
-if LLM_PROVIDER == "netapp":
-    _candidate_pems = [
-        os.getenv("NETAPP_CA_BUNDLE"),                              # explicit override
-        "/opt/homebrew/etc/openssl@3/certs/../cert.pem",             # macOS (Apple Silicon)
-        "/usr/local/etc/openssl@3/certs/../cert.pem",                # macOS (Intel)
-        "/etc/ssl/certs/ca-certificates.crt",                        # Debian/Ubuntu (Linux/Docker)
-        "/etc/pki/tls/certs/ca-bundle.crt",                          # RHEL/CentOS (Linux)
-    ]
-    pem = next((p for p in _candidate_pems if p and Path(p).is_file()), None)
-    if pem:
-        os.environ["REQUESTS_CA_BUNDLE"] = pem
-        os.environ["SSL_CERT_FILE"]      = pem
-        os.environ["CURL_CA_BUNDLE"]     = pem
 
 # -----------------------------------------------------------------------------
 # Paths
@@ -61,13 +41,6 @@ CHROMA_DIR.mkdir(exist_ok=True)
 # Provider-specific settings
 # llm_factory.py reads these — agents never touch them directly
 # -----------------------------------------------------------------------------
-
-# ── NetApp proxy (OpenAI-compatible) ─────────────────────────────────────────
-NETAPP_BASE_URL   = "https://llm-proxy-api.ai.eng.netapp.com"
-NETAPP_USER       = "ak16683"    # mandatory header for NetApp proxy
-NETAPP_LLM_MODEL  = "gpt-4.1"
-NETAPP_EMBED_MODEL = "text-embedding-3-small"
-NETAPP_API_KEY    = os.getenv("OPENAI_API_KEY")
 
 # ── Direct OpenAI ─────────────────────────────────────────────────────────────
 OPENAI_API_KEY    = os.getenv("OPENAI_API_KEY")
@@ -93,7 +66,6 @@ OLLAMA_EMBED_MODEL = os.getenv("OLLAMA_EMBED_MODEL", "nomic-embed-text")
 # These auto-resolve based on LLM_PROVIDER — don't set manually
 # -----------------------------------------------------------------------------
 _MODEL_MAP = {
-    "netapp": NETAPP_LLM_MODEL,
     "openai": OPENAI_LLM_MODEL,
     "groq":   GROQ_LLM_MODEL,
     "gemini": GEMINI_LLM_MODEL,
@@ -103,9 +75,8 @@ LLM_MODEL = _MODEL_MAP.get(LLM_PROVIDER, OPENAI_LLM_MODEL)
 
 # Embeddings — Groq and Ollama(llama) don't offer embeddings API
 # so they fall back to OpenAI embeddings (or HuggingFace if no key)
-EMBED_VIA_OPENAI = LLM_PROVIDER in ("netapp", "openai")
+EMBED_VIA_OPENAI = LLM_PROVIDER in ("op", "openai")
 EMBED_MODEL = {
-    "netapp": NETAPP_EMBED_MODEL,
     "openai": OPENAI_EMBED_MODEL,
     "gemini": GEMINI_EMBED_MODEL,
     "ollama": OLLAMA_EMBED_MODEL,

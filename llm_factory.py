@@ -8,7 +8,6 @@
 # No changes needed in any agent file.
 #
 # Supported providers:
-#   netapp  → OpenAI-compatible NetApp proxy (current)
 #   openai  → Direct OpenAI API
 #   groq    → Groq fast inference (free tier)
 #   gemini  → Google Gemini
@@ -27,21 +26,6 @@ import config
 def get_llm(temperature: float = 0.3):
     provider = config.LLM_PROVIDER
 
-    # ── NetApp proxy (OpenAI-compatible) ─────────────────────────────────────
-    if provider == "netapp":
-        import httpx
-        from langchain_openai import ChatOpenAI
-        # NetApp uses a corporate CA — disable SSL verification for the proxy.
-        # This is safe: we're on corp VPN talking to an internal endpoint.
-        _http_client = httpx.Client(verify=False)
-        return ChatOpenAI(
-            model=config.NETAPP_LLM_MODEL,
-            base_url=config.NETAPP_BASE_URL,
-            api_key=config.NETAPP_API_KEY,
-            model_kwargs={"user": config.NETAPP_USER},
-            temperature=temperature,
-            http_client=_http_client,
-        )
 
     # ── Direct OpenAI ─────────────────────────────────────────────────────────
     if provider == "openai":
@@ -81,7 +65,7 @@ def get_llm(temperature: float = 0.3):
 
     raise ValueError(
         f"Unknown LLM_PROVIDER: '{provider}'. "
-        "Choose: netapp | openai | groq | gemini | ollama"
+        "Choose: openai | groq | gemini | ollama"
     )
 
 
@@ -93,16 +77,6 @@ def get_llm(temperature: float = 0.3):
 # ---------------------------------------------------------------------------
 def get_embedder():
     provider = config.LLM_PROVIDER
-
-    # ── NetApp proxy ──────────────────────────────────────────────────────────
-    if provider == "netapp":
-        from langchain_openai import OpenAIEmbeddings
-        return OpenAIEmbeddings(
-            model=config.NETAPP_EMBED_MODEL,
-            base_url=config.NETAPP_BASE_URL,
-            api_key=config.NETAPP_API_KEY,
-            model_kwargs={"user": config.NETAPP_USER},
-        )
 
     # ── Direct OpenAI ─────────────────────────────────────────────────────────
     if provider == "openai":
@@ -142,7 +116,7 @@ def get_embedder():
 
     raise ValueError(
         f"Unknown LLM_PROVIDER: '{provider}'. "
-        "Choose: netapp | openai | groq | gemini | ollama"
+        "Choose: openai | groq | gemini | ollama"
     )
 
 
